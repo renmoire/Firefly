@@ -48,12 +48,12 @@
 }
 
 .hero-char img {
-    height: clamp(70vh, 120vh, 130vh);
+    height: clamp(70vh, 130vh, 150vh);
     width: auto;
 
     opacity: 0;
     transition: opacity 0.7s ease, transform 0.7s ease;
-    transform: translateX(100px)
+    transform: translateX(120px)
 }
 
 .hero-char img.fade {
@@ -86,7 +86,7 @@
   display: flex;
   height: 100vh;
   overflow: hidden;
-  background-color: #fff;
+  background-color: #e6f1ff;
 }
 
 .show {
@@ -96,12 +96,12 @@
 
     -webkit-mask-image: linear-gradient(
         to right,
-        black 60%,
+        black 50%,
         transparent 100%
     );
     mask-image: linear-gradient(
         to right,
-        black 60%,
+        black 50%,
         transparent 100%
     );
 
@@ -136,4 +136,12 @@
 
 .f2 {
     object-position: 30% center;
+}
+
+.f3 {
+    object-position: 100% center;
+}
+
+.f4 {
+    object-position: 45% center;
 }
