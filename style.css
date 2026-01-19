@@ -20,7 +20,14 @@
     inset: 0;
     z-index: 0;
 
-    background-image: url(assets/bg.png);
+    background-image: 
+        linear-gradient(
+            65deg,
+            rgba(0,0,0,0.79) 19%,
+            rgba(0,0,0,0) 69%
+        ),
+        url(assets/bg.png);
+        
     background-repeat: no-repeat;
     background-position: center;
     background-size: cover;
@@ -77,16 +84,61 @@
 }
 
 .bio .title {
-        font-size: 130px;
+    font-size: 130px;
 }
+
+
+
+/*? INDEX RELATED */
+.index-related {
+    min-height: 100vh;
+    padding: 1.5rem;
+    max-width: 1100px
+}
+
+.related-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    padding-bottom: 0.25rem;
+    border-bottom: 1px solid #cfcfcf;
+    color: #000;
+}
+
+.cards {
+    display: flex;
+    gap: 1.5rem;
+}
+
+.card {
+    text-decoration: none;
+    display: block;
+}
+
+.thumbnail-image {
+    background: #ffffff;
+    position: relative;
+    border: 1px solid #d8d8d8;
+    padding: 6px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+    overflow: hidden;
+    max-width: 360px; /* sesuaikan */
+}
+
+.thumbnail-image img {
+    width: 100%;
+    display: block;
+    filter: brightness(0.7);
+}
+
 
 /*! INDEX MOMENTS */
 .index-moments {
-  position: relative;
-  display: flex;
-  height: 100vh;
-  overflow: hidden;
-  background-color: #e6f1ff;
+    position: relative;
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+    background-color: #e6f1ff;
 }
 
 .show {
@@ -144,4 +196,9 @@
 
 .f4 {
     object-position: 45% center;
+}
+
+.f5 {
+    object-position: 70% center;
+    transform: scale(1.39) translateY(30px);
 }
