@@ -39,16 +39,16 @@ function showpage(page) {
 }
 
 prevbt.addEventListener("click", () => {
-  if (currentpage > 1) {
-    currentpage--;
-    showpage(currentpage);
+    if (currentpage > 1) {
+        currentpage--;
+        showpage(currentpage);
   }
 });
 
 nextbt.addEventListener("click", () => {
-  if (currentpage < totalpages) {
-    currentpage++;
-    showpage(currentpage);
+    if (currentpage < totalpages) {
+        currentpage++;
+        showpage(currentpage);
   }
 });
 
