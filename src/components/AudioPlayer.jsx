@@ -107,12 +107,25 @@ function AudioPlayer() {
       const height = canvas.height;
       ctx.clearRect(0, 0, width, height);
 
-      // Ambil titik tengah tiap segmen, supaya kurva yang dibuat
-      // quadraticCurveTo punya titik kontrol yang pas (lihat penjelasan di bawah)
-      const points = Array.from(dataArray).map((value, i) => ({
-        x: (i / (bufferLength - 1)) * width,
-        y: height - (value / 255) * height,
-      }));
+      // Jumlah titik yang mau digambar di layar — gak perlu sebanyak bufferLength,
+      // 48 titik udah cukup mulus dan lebih murah dihitung.
+      const numPoints = 48;
+
+      const points = Array.from({ length: numPoints }, (_, i) => {
+        // Skala logaritmik: index kecil (kiri) ambil dari rentang frekuensi rendah
+        // yang sempit, index besar (kanan) ambil dari rentang frekuensi tinggi
+        // yang lebar — supaya bagian kanan juga "dapat jatah" sinyal yang berarti.
+        const logIndex = Math.pow(i / (numPoints - 1), 2) * (bufferLength - 1);
+        const value = dataArray[Math.floor(logIndex)];
+
+        // Math.sqrt mengangkat nilai-nilai kecil supaya tidak rata nempel ke dasar
+        const normalized = Math.sqrt(value / 255);
+
+        return {
+          x: (i / (numPoints - 1)) * width,
+          y: height - normalized * height,
+        };
+      });
 
       ctx.beginPath();
       ctx.moveTo(points[0].x, height); // mulai dari dasar kiri
