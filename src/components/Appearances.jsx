@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { useScrollReveal } from "../hooks/useScrollReveal";
+import { useInView } from "../hooks/useInView";
 import appearances from "../data/appearances";
 import AppearanceCard from "./AppearanceCard";
 import "./Appearances.css";
@@ -10,6 +11,7 @@ function Appearances() {
   const [page, setPage] = useState(1);
   const totalPages = Math.ceil(appearances.length / ITEMS_PER_PAGE);
   const containerRef = useScrollReveal();
+  const [gridRef, gridInView] = useInView(0.1);
 
   const visibleEntries = useMemo(() => {
     const start = (page - 1) * ITEMS_PER_PAGE;
@@ -24,9 +26,18 @@ function Appearances() {
         <h3 className="appearances__nihon">ファイアフライの記録</h3>
       </div>
 
-      <div className="appearances__grid">
-        {visibleEntries.map((entry) => (
-          <AppearanceCard key={entry.id} entry={entry} className="reveal" />
+      {/* key={page} membuat React menganggap grid ini elemen baru tiap ganti
+          halaman, supaya animasi card-in terpicu ulang. gridInView memastikan
+          animasi itu hanya boleh jalan SETELAH section ini pernah terlihat —
+          jadi tidak "kelar duluan" sebelum sempat di-scroll ke situ. */}
+      <div className="appearances__grid" key={page} ref={gridRef}>
+        {visibleEntries.map((entry, index) => (
+          <AppearanceCard
+            key={entry.id}
+            entry={entry}
+            className={gridInView ? "card-in" : "card-pending"}
+            style={{ "--card-i": index }}
+          />
         ))}
       </div>
 

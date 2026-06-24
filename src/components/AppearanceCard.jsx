@@ -1,9 +1,6 @@
-// Komponen kecil khusus untuk satu kartu video.
-// Memecah UI jadi komponen kecil seperti ini memudahkan kalau nanti
-// kamu mau ubah tampilan satu kartu saja, tanpa menyentuh logic grid/pagination.
-function AppearanceCard({ entry }) {
+function AppearanceCard({ entry, className = "", style }) {
   return (
-    <div className="appearance-card">
+    <div className={`appearance-card ${className}`} style={style}>
       <span className="appearance-card__date">{entry.date}</span>
 
       <a

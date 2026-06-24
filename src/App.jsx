@@ -2,8 +2,9 @@ import { useState } from "react";
 import Hero from "./components/Hero";
 import Moments from "./components/Moments";
 import Appearances from "./components/Appearances";
-// import AudioPlayer from "./components/AudioPlayer";
+import AudioPlayer from "./components/AudioPlayer";
 import LoadingScreen from "./components/LoadingScreen";
+import Footer from "./components/Footer";
 
 function App() {
   const [showLoading, setShowLoading] = useState(true);
@@ -15,7 +16,8 @@ function App() {
         <Hero />
         <Moments />
         <Appearances />
-        {/* <AudioPlayer /> */}
+        <Footer />
+        <AudioPlayer />
       </main>
 
       {showLoading && (
