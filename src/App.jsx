@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import Hero from "./components/Hero";
 import Moments from "./components/Moments";
 import Appearances from "./components/Appearances";
+import AudioPlayer from "./components/AudioPlayer";
 
 // App.jsx sengaja dibuat tipis — hanya menyusun urutan section.
 // Semua logic dan tampilan detail ada di masing-masing komponennya sendiri.
@@ -20,24 +21,32 @@ function App() {
 
   // Begitu user berinteraksi sedikit pun, baru nyalakan suaranya
   useEffect(() => {
-    const unmute = () => {
-      audioRef.current.muted = false;
-      setIsMuted(false);
-      window.removeEventListener("click", unmute);
-      window.removeEventListener("scroll", unmute);
-      window.removeEventListener("keydown", unmute);
-    };
+  const unmute = () => {
+    const audio = audioRef.current;
+    audio.muted = false;
+    setIsMuted(false);
 
-    window.addEventListener("click", unmute);
-    window.addEventListener("scroll", unmute);
-    window.addEventListener("keydown", unmute);
+    // Kalau ternyata sempat ke-pause oleh browser, paksa play lagi di sini —
+    // titik ini ('unmute') terjadi tepat saat user klik, jadi browser pasti izinkan.
+    if (audio.paused) {
+      audio.play().catch(() => {});
+    }
 
-    return () => {
-      window.removeEventListener("click", unmute);
-      window.removeEventListener("scroll", unmute);
-      window.removeEventListener("keydown", unmute);
-    };
-  }, []);
+    window.removeEventListener("click", unmute);
+    window.removeEventListener("scroll", unmute);
+    window.removeEventListener("keydown", unmute);
+  };
+
+  window.addEventListener("click", unmute);
+  window.addEventListener("scroll", unmute);
+  window.addEventListener("keydown", unmute);
+
+  return () => {
+    window.removeEventListener("click", unmute);
+    window.removeEventListener("scroll", unmute);
+    window.removeEventListener("keydown", unmute);
+  };
+}, []);
 
   return (
     <main>
@@ -45,6 +54,7 @@ function App() {
       <Hero />
       <Moments />
       <Appearances />
+      <AudioPlayer />
     </main>
   );
 }

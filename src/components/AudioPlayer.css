@@ -1,0 +1,35 @@
+.audio-player {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0 1.5rem;
+  background: rgba(11, 9, 7, 0.85);
+  backdrop-filter: blur(8px);
+  z-index: 50;
+  border-top: 1px solid rgba(255, 177, 92, 0.2);
+}
+
+.audio-player__mute {
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.audio-player__volume {
+  width: 120px;
+  flex-shrink: 0;
+  accent-color: #ffb15c;
+}
+
+.audio-player__canvas {
+  flex: 1;
+  height: 40px;
+  width: 100%;
+}
