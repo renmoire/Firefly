@@ -1,0 +1,49 @@
+/* ============================================
+   DESIGN TOKENS
+   Semua warna, font, dan ukuran "ajaib" yang dipakai berulang
+   didefinisikan di sini sebagai CSS variable, supaya kalau mau
+   ganti palet warna nanti, cukup ubah di satu tempat ini saja.
+   ============================================ */
+:root {
+  /* Palet "ember" — terinspirasi api kecil & langit malam Penacony */
+  --ember-100: #ffd9ad;
+  --ember-300: #ffb15c;
+  --ember-500: #ff8a3d;
+
+  /* Skala netral gelap → terang */
+  --ink-950: #0b0907;
+  --ink-900: #161310;
+  --ink-500: #6f6657;
+  --ink-400: #8c8478;
+  --ink-300: #b9b1a3;
+  --ink-50: #f5efe6;
+
+  --font-display: "Cormorant", "Georgia", serif;
+  --font-mono: "JetBrains Mono", "Courier New", monospace;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Inter", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+  background: var(--ink-50);
+}
+
+a {
+  color: inherit;
+}
+
+/* Class kecil yang dipakai bersama oleh beberapa komponen
+   (Hero, Moments, Appearances) untuk label kecil di atas judul. */
+.hero__eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
