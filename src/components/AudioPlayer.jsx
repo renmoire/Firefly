@@ -4,81 +4,45 @@ import "./AudioPlayer.css";
 function AudioPlayer() {
   const audioRef = useRef(null);
   const canvasRef = useRef(null);
-  const analyserRef = useRef(null);
-  const audioContextRef = useRef(null); // tambahan: simpan context juga
 
   const [isMuted, setIsMuted] = useState(true);
   const [volume, setVolume] = useState(0.6);
 
-  // ---- Bagian 1: Setup Web Audio API ----
+  // ---- Bagian 1: Setup audio (tanpa Web Audio API / analyser) ----
   useEffect(() => {
     const audio = audioRef.current;
-
-    // PENTING: kalau analyser udah pernah dibuat (misal karena StrictMode
-    // menjalankan efek ini dua kali), jangan buat ulang — cukup pakai yang lama.
-    if (analyserRef.current) return;
-
-    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    const source = audioContext.createMediaElementSource(audio);
-    const analyser = audioContext.createAnalyser();
-
-    analyser.fftSize = 128;
-    source.connect(analyser);
-    analyser.connect(audioContext.destination);
-
-    analyserRef.current = analyser;
-    audioContextRef.current = audioContext;
-
     audio.muted = true;
     audio.addEventListener("canplay", () => {
       audio.play().catch(() => {});
     });
-
-    analyser.fftSize = 128;
-    analyser.smoothingTimeConstant = 0.85; // ← tambahkan baris ini
-    source.connect(analyser);
-
-    // Tidak ada cleanup yang menutup audioContext di sini —
-    // karena kalau StrictMode unmount-mount ulang, context yang sama
-    // masih kita pakai lagi lewat pengecekan di atas.
   }, []);
 
-// ---- Bagian 1.5: Pastikan resolusi canvas mengikuti lebar layar asli ----
-  // Tanpa ini, canvas.width tetap di nilai hardcode (600) walau tampilannya
-  // direntangkan 100% oleh CSS — menyebabkan gambar jadi salah skala/terpotong.
+  // ---- Bagian 1.5: Resolusi canvas mengikuti lebar layar ----
   useEffect(() => {
     const canvas = canvasRef.current;
-
     const resize = () => {
       canvas.width = canvas.clientWidth;
       canvas.height = canvas.clientHeight;
     };
-
     resize();
     window.addEventListener("resize", resize);
     return () => window.removeEventListener("resize", resize);
   }, []);
 
-// ---- Bagian 1.6: Auto-unmute begitu ada aktivitas apa pun dari user ----
+  // ---- Bagian 1.6: Auto-unmute saat ada aktivitas user ----
   useEffect(() => {
     const unmute = () => {
       const audio = audioRef.current;
       audio.muted = false;
       setIsMuted(false);
-
-      if (audio.paused) {
-        audio.play().catch(() => {});
-      }
-
+      if (audio.paused) audio.play().catch(() => {});
       window.removeEventListener("click", unmute);
       window.removeEventListener("scroll", unmute);
       window.removeEventListener("keydown", unmute);
     };
-
     window.addEventListener("click", unmute);
     window.addEventListener("scroll", unmute);
     window.addEventListener("keydown", unmute);
-
     return () => {
       window.removeEventListener("click", unmute);
       window.removeEventListener("scroll", unmute);
@@ -86,68 +50,74 @@ function AudioPlayer() {
     };
   }, []);
 
-  // ---- Bagian 2: Gambar ulang area smooth, terus-menerus ----
+  // ---- Bagian 2: Smooth wave animasi (tanpa audio data) ----
   useEffect(() => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
     let animationId;
+    let startTime = null;
 
-    const draw = () => {
-      const analyser = analyserRef.current;
-      if (!analyser) {
-        animationId = requestAnimationFrame(draw);
-        return;
-      }
+    // Konfigurasi gelombang — bisa bebas ditambah/dikurangi lapisannya
+    const waves = [
+      { amplitude: 0.38, frequency: 1.4, speed: 0.0007, phaseOffset: 0 },
+      { amplitude: 0.22, frequency: 2.5, speed: 0.0011, phaseOffset: 1.2 },
+      { amplitude: 0.14, frequency: 3.8, speed: 0.0009, phaseOffset: 2.7 },
+    ];
 
-      const bufferLength = analyser.frequencyBinCount;
-      const dataArray = new Uint8Array(bufferLength);
-      analyser.getByteFrequencyData(dataArray);
+    const draw = (timestamp) => {
+      if (!startTime) startTime = timestamp;
+      const elapsed = timestamp - startTime;
 
       const width = canvas.width;
       const height = canvas.height;
       ctx.clearRect(0, 0, width, height);
 
-      // Jumlah titik yang mau digambar di layar — gak perlu sebanyak bufferLength,
-      // 48 titik udah cukup mulus dan lebih murah dihitung.
-      const numPoints = 48;
+      const numPoints = 120; // makin banyak = makin mulus
 
+      // Hitung titik-titik Y dari gabungan semua gelombang
       const points = Array.from({ length: numPoints }, (_, i) => {
-        // Skala logaritmik: index kecil (kiri) ambil dari rentang frekuensi rendah
-        // yang sempit, index besar (kanan) ambil dari rentang frekuensi tinggi
-        // yang lebar — supaya bagian kanan juga "dapat jatah" sinyal yang berarti.
-        const logIndex = Math.pow(i / (numPoints - 1), 2) * (bufferLength - 1);
-        const value = dataArray[Math.floor(logIndex)];
+        const x = (i / (numPoints - 1)) * width;
+        const t = i / (numPoints - 1); // 0..1
 
-        // Math.sqrt mengangkat nilai-nilai kecil supaya tidak rata nempel ke dasar
-        const normalized = Math.sqrt(value / 255);
+        // Superposisi semua gelombang
+        const combinedY = waves.reduce((sum, w) => {
+          return (
+            sum +
+            w.amplitude *
+              Math.sin(t * Math.PI * 2 * w.frequency + elapsed * w.speed + w.phaseOffset)
+          );
+        }, 0);
 
-        return {
-          x: (i / (numPoints - 1)) * width,
-          y: height - normalized * height,
-        };
+        // combinedY berkisar -totalAmp..+totalAmp, petakan ke piksel
+        // baseline: 65% dari bawah canvas; naik/turun dari situ
+        const totalAmp = waves.reduce((s, w) => s + w.amplitude, 0);
+        const baseline = height * 0.65;
+        const y = baseline - (combinedY / totalAmp) * baseline * 0.75;
+
+        return { x, y };
       });
 
+      // Gambar path dengan kurva halus
       ctx.beginPath();
-      ctx.moveTo(points[0].x, height); // mulai dari dasar kiri
+      ctx.moveTo(0, height); // pojok kiri bawah
       ctx.lineTo(points[0].x, points[0].y);
 
-      // quadraticCurveTo melengkungkan garis lewat titik tengah antara
-      // dua titik data, jadi hasilnya halus, bukan zig-zag tajam.
       for (let i = 0; i < points.length - 1; i++) {
-        const current = points[i];
-        const next = points[i + 1];
-        const midX = (current.x + next.x) / 2;
-        const midY = (current.y + next.y) / 2;
-        ctx.quadraticCurveTo(current.x, current.y, midX, midY);
+        const cur = points[i];
+        const nxt = points[i + 1];
+        const midX = (cur.x + nxt.x) / 2;
+        const midY = (cur.y + nxt.y) / 2;
+        ctx.quadraticCurveTo(cur.x, cur.y, midX, midY);
       }
+
       ctx.lineTo(points[points.length - 1].x, points[points.length - 1].y);
-      ctx.lineTo(points[points.length - 1].x, height); // turun ke dasar kanan
+      ctx.lineTo(width, height); // pojok kanan bawah
       ctx.closePath();
 
-      // Gradient: lebih terang di puncak, makin transparan ke dasar
+      // Gradient warna — sama seperti sebelumnya
       const gradient = ctx.createLinearGradient(0, 0, 0, height);
-      gradient.addColorStop(0, "rgba(255, 177, 92, 0.85)");
-      gradient.addColorStop(1, "rgba(255, 177, 92, 0.05)");
+      gradient.addColorStop(0, "rgba(255, 177, 92, 0.75)");
+      gradient.addColorStop(1, "rgba(255, 177, 92, 0.29)");
 
       ctx.fillStyle = gradient;
       ctx.fill();
@@ -155,7 +125,7 @@ function AudioPlayer() {
       animationId = requestAnimationFrame(draw);
     };
 
-    draw();
+    animationId = requestAnimationFrame(draw);
     return () => cancelAnimationFrame(animationId);
   }, []);
 
@@ -169,10 +139,7 @@ function AudioPlayer() {
     const nextMuted = !isMuted;
     audio.muted = nextMuted;
     setIsMuted(nextMuted);
-
-    if (!nextMuted && audio.paused) {
-      audio.play().catch(() => {});
-    }
+    if (!nextMuted && audio.paused) audio.play().catch(() => {});
   };
 
   return (
@@ -184,7 +151,6 @@ function AudioPlayer() {
         onClick={toggleMute}
         aria-label={isMuted ? "Unmute" : "Mute"}
       >
-        {isMuted ? "🔇" : "🔊"}
       </button>
 
       <input

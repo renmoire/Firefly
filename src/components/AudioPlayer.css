@@ -28,7 +28,8 @@
 }
 
 .audio-player__volume {
-  width: 100px;
+  width: 110px;
+  height: 5px;
   flex-shrink: 0;
   accent-color: #ffb15c;
   z-index: 1;
