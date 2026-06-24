@@ -42,7 +42,7 @@ function Appearances() {
           ←
         </button>
         <span className="appearances__page-info">
-          {page} / {totalPages}
+          {page} ——— {totalPages}
         </span>
         <button
           type="button"
