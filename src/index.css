@@ -32,7 +32,19 @@ body {
   font-family: "Inter", sans-serif;
   font-optical-sizing: auto;
   font-style: normal;
-  background: var(--ink-50);
+  background: #0b0907; /* ganti dari var(--ink-50) */
+}
+
+main {
+  transition: opacity 0.6s ease-in;
+}
+
+main.main--hidden {
+  opacity: 0;
+}
+
+main.main--visible {
+  opacity: 1;
 }
 
 a {
