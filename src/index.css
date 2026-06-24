@@ -47,3 +47,43 @@ a {
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
+
+/* ── Scroll Reveal ──────────────────────────────────────────
+   Tambahkan class "reveal" ke elemen yang mau di-animate.
+   Hook useScrollReveal() akan add "reveal--visible" saat masuk viewport.
+   ─────────────────────────────────────────────────────────── */
+
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition:
+    opacity 0.65s ease,
+    transform 0.65s ease;
+}
+
+/* Variasi arah — opsional, pakai sesuai kebutuhan */
+.reveal--left {
+  transform: translateX(-32px);
+}
+
+.reveal--right {
+  transform: translateX(32px);
+}
+
+.reveal--scale {
+  transform: scale(0.94);
+}
+
+/* State visible — ditambah oleh hook */
+.reveal--visible {
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}

@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useScrollReveal } from "../hooks/useScrollReveal";
 import appearances from "../data/appearances";
 import AppearanceCard from "./AppearanceCard";
 import "./Appearances.css";

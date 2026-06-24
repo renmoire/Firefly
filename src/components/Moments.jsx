@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useScrollReveal } from "../hooks/useScrollReveal";
 import moments from "../data/moments";
 import "./Moments.css";
 
