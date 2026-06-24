@@ -34,7 +34,7 @@ firefly-react/
 - **Ubah teks di Hero** (judul, deskripsi) → edit `src/components/Hero.jsx`.
 - **Ubah warna/font global** → edit variabel di `src/index.css` bagian `:root`.
 
-## Kenapa strukturnya begini? (untuk yang baru belajar React)
+## Kenapa strukturnya begini?
 
 - **Komponen** = potongan UI yang berdiri sendiri. Tiap section halaman (Hero, Moments, Appearances) jadi file `.jsx` sendiri, supaya kalau ada bug atau mau ubah satu bagian, kamu tidak perlu bingung mencari di file yang panjang.
 - **`useState`** dipakai untuk menyimpan "apa yang sedang ditampilkan sekarang" (misalnya slide ke berapa, halaman pagination ke berapa). Setiap kali nilai ini berubah, React otomatis menggambar ulang tampilan — kamu tidak perlu manual `classList.add/remove` seperti di vanilla JS.
