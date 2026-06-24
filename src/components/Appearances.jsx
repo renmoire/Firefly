@@ -6,13 +6,10 @@ import "./Appearances.css";
 
 const ITEMS_PER_PAGE = 3;
 
-// Versi React dari logic pagination yang dulu di script.js (showpage()).
-// Bedanya: dulu kita ubah `display: none/flex` tiap kartu lewat DOM langsung.
-// Sekarang kita hitung dulu "kartu mana saja yang harus tampil di halaman ini"
-// dengan slice(), lalu React yang merender ulang hanya kartu-kartu itu.
 function Appearances() {
   const [page, setPage] = useState(1);
   const totalPages = Math.ceil(appearances.length / ITEMS_PER_PAGE);
+  const containerRef = useScrollReveal();
 
   const visibleEntries = useMemo(() => {
     const start = (page - 1) * ITEMS_PER_PAGE;
@@ -20,8 +17,8 @@ function Appearances() {
   }, [page]);
 
   return (
-    <section className="appearances" id="appearances">
-      <div className="appearances__header">
+    <section className="appearances" id="appearances" ref={containerRef}>
+      <div className="appearances__header reveal">
         <span className="hero__eyebrow">Archive · Public Appearances</span>
         <h2 className="appearances__title">Firefly's Appearances</h2>
         <h3 className="appearances__nihon">ファイアフライの記録</h3>
@@ -29,7 +26,7 @@ function Appearances() {
 
       <div className="appearances__grid">
         {visibleEntries.map((entry) => (
-          <AppearanceCard key={entry.id} entry={entry} />
+          <AppearanceCard key={entry.id} entry={entry} className="reveal" />
         ))}
       </div>
 

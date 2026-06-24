@@ -3,25 +3,19 @@ import { useScrollReveal } from "../hooks/useScrollReveal";
 import moments from "../data/moments";
 import "./Moments.css";
 
-// Ini versi React dari setInterval yang dulu di script.js.
-// Bedanya: di React kita simpan "slide yang aktif sekarang" di state (currentIndex),
-// lalu biarkan React yang menggambar ulang tampilan setiap kali state berubah —
-// kita tidak lagi menambah/menghapus class secara manual lewat document.querySelector.
 function Moments() {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const containerRef = useScrollReveal();
 
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % moments.length);
     }, 2500);
-
-    // Cleanup: hentikan interval saat komponen dilepas, supaya tidak terus jalan
-    // di background dan menyebabkan memory leak.
     return () => clearInterval(interval);
   }, []);
 
   return (
-    <section className="moments">
+    <section className="moments" ref={containerRef}>
       <div className="moments__show">
         {moments.map((moment, index) => (
           <div
@@ -42,7 +36,7 @@ function Moments() {
         ))}
       </div>
 
-      <div className="moments__text">
+      <div className="moments__text reveal">
         <span className="hero__eyebrow">Archive · Candid Moments</span>
         <h2 className="moments__title">Quiet Moments</h2>
         <p className="moments__desc">

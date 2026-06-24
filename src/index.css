@@ -60,42 +60,28 @@ a {
   text-transform: uppercase;
 }
 
-/* ── Scroll Reveal ──────────────────────────────────────────
-   Tambahkan class "reveal" ke elemen yang mau di-animate.
-   Hook useScrollReveal() akan add "reveal--visible" saat masuk viewport.
-   ─────────────────────────────────────────────────────────── */
-
+/* ============================================
+   SCROLL REVEAL
+   Elemen dengan class "reveal" mulai tersembunyi & sedikit turun,
+   lalu fade-in + naik ke posisi normal saat IntersectionObserver
+   (lihat useScrollReveal.js) mendeteksi elemen masuk viewport.
+   ============================================ */
 .reveal {
   opacity: 0;
-  transform: translateY(28px);
-  transition:
-    opacity 0.65s ease,
-    transform 0.65s ease;
+  transform: translateY(24px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+  transition-delay: calc(var(--reveal-i, 0) * 1ms);
 }
 
-/* Variasi arah — opsional, pakai sesuai kebutuhan */
-.reveal--left {
-  transform: translateX(-32px);
-}
-
-.reveal--right {
-  transform: translateX(32px);
-}
-
-.reveal--scale {
-  transform: scale(0.94);
-}
-
-/* State visible — ditambah oleh hook */
 .reveal--visible {
-  opacity: 1 !important;
-  transform: none !important;
+  opacity: 1;
+  transform: translateY(0);
 }
 
 @media (prefers-reduced-motion: reduce) {
   .reveal {
+    transition: none;
     opacity: 1;
     transform: none;
-    transition: none;
   }
 }

@@ -2,29 +2,26 @@ import { useState } from "react";
 import Hero from "./components/Hero";
 import Moments from "./components/Moments";
 import Appearances from "./components/Appearances";
-import AudioPlayer from "./components/AudioPlayer";
+// import AudioPlayer from "./components/AudioPlayer";
 import LoadingScreen from "./components/LoadingScreen";
 
 function App() {
-  // "loading" → "revealing" → "done"
-  const [stage, setStage] = useState("loading");
+  const [showLoading, setShowLoading] = useState(true);
+  const [mainVisible, setMainVisible] = useState(false);
 
   return (
     <>
-      {stage !== "loading" && (
-        <main className={stage === "done" ? "is-visible" : ""}>
-          <Hero />
-          <Moments />
-          <Appearances />
-          <AudioPlayer />
-        </main>
-      )}
+      <main className={mainVisible ? "main--visible" : "main--hidden"}>
+        <Hero />
+        <Moments />
+        <Appearances />
+        {/* <AudioPlayer /> */}
+      </main>
 
-      {stage !== "done" && (
+      {showLoading && (
         <LoadingScreen
-          fadeOut={stage === "revealing"}
-          onFadeOutStart={() => setStage("revealing")}
-          onDone={() => setStage("done")}
+          onFadeOutStart={() => setMainVisible(true)}
+          onDone={() => setShowLoading(false)}
         />
       )}
     </>
