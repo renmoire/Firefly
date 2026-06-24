@@ -43,6 +43,49 @@ function AudioPlayer() {
     // masih kita pakai lagi lewat pengecekan di atas.
   }, []);
 
+// ---- Bagian 1.5: Pastikan resolusi canvas mengikuti lebar layar asli ----
+  // Tanpa ini, canvas.width tetap di nilai hardcode (600) walau tampilannya
+  // direntangkan 100% oleh CSS — menyebabkan gambar jadi salah skala/terpotong.
+  useEffect(() => {
+    const canvas = canvasRef.current;
+
+    const resize = () => {
+      canvas.width = canvas.clientWidth;
+      canvas.height = canvas.clientHeight;
+    };
+
+    resize();
+    window.addEventListener("resize", resize);
+    return () => window.removeEventListener("resize", resize);
+  }, []);
+
+// ---- Bagian 1.6: Auto-unmute begitu ada aktivitas apa pun dari user ----
+  useEffect(() => {
+    const unmute = () => {
+      const audio = audioRef.current;
+      audio.muted = false;
+      setIsMuted(false);
+
+      if (audio.paused) {
+        audio.play().catch(() => {});
+      }
+
+      window.removeEventListener("click", unmute);
+      window.removeEventListener("scroll", unmute);
+      window.removeEventListener("keydown", unmute);
+    };
+
+    window.addEventListener("click", unmute);
+    window.addEventListener("scroll", unmute);
+    window.addEventListener("keydown", unmute);
+
+    return () => {
+      window.removeEventListener("click", unmute);
+      window.removeEventListener("scroll", unmute);
+      window.removeEventListener("keydown", unmute);
+    };
+  }, []);
+
   // ---- Bagian 2: Gambar ulang area smooth, terus-menerus ----
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -142,7 +185,7 @@ function AudioPlayer() {
         aria-label="Volume"
       />
 
-      <canvas ref={canvasRef} className="audio-player__canvas" width="600" height="40" />
+      <canvas ref={canvasRef} className="audio-player__canvas" />
     </div>
   );
 }

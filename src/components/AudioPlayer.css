@@ -38,6 +38,6 @@
   position: absolute;
   inset: 0;
   width: 100%;
-  height: 100%;
-  pointer-events: none; /* supaya canvas tidak menghalangi klik tombol/slider di atasnya */
+  height: 56px; /* samakan dengan height .audio-player */
+  pointer-events: none;
 }
