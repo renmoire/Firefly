@@ -26,55 +26,14 @@
   z-index: 1;
 }
 
-/* ---- Signature element: percikan ember melayang ----
-   Sesuai nama "Firefly" — bukan dekorasi acak, tapi representasi visual
-   dari konsep karakternya (api kecil, kunang-kunang). */
-.hero__embers {
+/* ── Ambient canvas — full-cover, pointer-events off ── */
+.hero__ambient {
   position: absolute;
   inset: 0;
+  width: 100%;
+  height: 100%;
   z-index: 1;
   pointer-events: none;
-}
-
-.ember {
-  position: absolute;
-  bottom: -10%;
-  left: calc(5% + (var(--i) * 5.2%));
-  width: 3px;
-  height: 3px;
-  border-radius: 50%;
-  background: var(--ember-300);
-  box-shadow: 0 0 6px 2px var(--ember-300);
-  opacity: 0;
-  animation: rise 9s ease-in infinite;
-  animation-delay: calc(var(--i) * -0.55s);
-}
-
-.ember:nth-child(odd) {
-  background: var(--ember-100);
-  box-shadow: 0 0 5px 2px var(--ember-100);
-  width: 2px;
-  height: 2px;
-}
-
-@keyframes rise {
-  0% {
-    transform: translateY(0) translateX(0);
-    opacity: 0;
-  }
-  10% {
-    opacity: 0.9;
-  }
-  50% {
-    transform: translateY(-55vh) translateX(12px);
-  }
-  90% {
-    opacity: 0.4;
-  }
-  100% {
-    transform: translateY(-100vh) translateX(-8px);
-    opacity: 0;
-  }
 }
 
 .hero__bio {
@@ -202,9 +161,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .ember {
-    animation: none;
-    opacity: 0;
+  .hero__ambient {
+    display: none;
   }
   .hero__char img,
   .hero__cta {
