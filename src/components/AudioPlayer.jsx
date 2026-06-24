@@ -5,36 +5,45 @@ function AudioPlayer() {
   const audioRef = useRef(null);
   const canvasRef = useRef(null);
   const analyserRef = useRef(null);
+  const audioContextRef = useRef(null); // tambahan: simpan context juga
 
   const [isMuted, setIsMuted] = useState(true);
   const [volume, setVolume] = useState(0.6);
 
   // ---- Bagian 1: Setup Web Audio API ----
-  // Ini hanya boleh dijalankan SEKALI, karena menyambungkan elemen <audio>
-  // ke AnalyserNode tidak bisa dilakukan dua kali pada elemen yang sama.
   useEffect(() => {
     const audio = audioRef.current;
+
+    // PENTING: kalau analyser udah pernah dibuat (misal karena StrictMode
+    // menjalankan efek ini dua kali), jangan buat ulang — cukup pakai yang lama.
+    if (analyserRef.current) return;
 
     const audioContext = new (window.AudioContext || window.webkitAudioContext)();
     const source = audioContext.createMediaElementSource(audio);
     const analyser = audioContext.createAnalyser();
 
-    analyser.fftSize = 128; // semakin besar, semakin detail garisnya (tapi lebih berat)
+    analyser.fftSize = 128;
     source.connect(analyser);
-    analyser.connect(audioContext.destination); // supaya suara tetap keluar ke speaker
+    analyser.connect(audioContext.destination);
 
     analyserRef.current = analyser;
+    audioContextRef.current = audioContext;
 
-    // Coba play dalam keadaan bisu begitu siap
     audio.muted = true;
     audio.addEventListener("canplay", () => {
       audio.play().catch(() => {});
     });
 
-    return () => audioContext.close();
+    analyser.fftSize = 128;
+    analyser.smoothingTimeConstant = 0.85; // ← tambahkan baris ini
+    source.connect(analyser);
+
+    // Tidak ada cleanup yang menutup audioContext di sini —
+    // karena kalau StrictMode unmount-mount ulang, context yang sama
+    // masih kita pakai lagi lewat pengecekan di atas.
   }, []);
 
-  // ---- Bagian 2: Gambar ulang garis terus-menerus ----
+  // ---- Bagian 2: Gambar ulang area smooth, terus-menerus ----
   useEffect(() => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
@@ -55,25 +64,37 @@ function AudioPlayer() {
       const height = canvas.height;
       ctx.clearRect(0, 0, width, height);
 
+      // Ambil titik tengah tiap segmen, supaya kurva yang dibuat
+      // quadraticCurveTo punya titik kontrol yang pas (lihat penjelasan di bawah)
+      const points = Array.from(dataArray).map((value, i) => ({
+        x: (i / (bufferLength - 1)) * width,
+        y: height - (value / 255) * height,
+      }));
+
       ctx.beginPath();
-      const sliceWidth = width / bufferLength;
+      ctx.moveTo(points[0].x, height); // mulai dari dasar kiri
+      ctx.lineTo(points[0].x, points[0].y);
 
-      dataArray.forEach((value, i) => {
-        // value: 0–255 → diubah jadi tinggi garis (px) dari tengah
-        const barHeight = (value / 255) * height;
-        const x = i * sliceWidth;
-        const y = height - barHeight;
+      // quadraticCurveTo melengkungkan garis lewat titik tengah antara
+      // dua titik data, jadi hasilnya halus, bukan zig-zag tajam.
+      for (let i = 0; i < points.length - 1; i++) {
+        const current = points[i];
+        const next = points[i + 1];
+        const midX = (current.x + next.x) / 2;
+        const midY = (current.y + next.y) / 2;
+        ctx.quadraticCurveTo(current.x, current.y, midX, midY);
+      }
+      ctx.lineTo(points[points.length - 1].x, points[points.length - 1].y);
+      ctx.lineTo(points[points.length - 1].x, height); // turun ke dasar kanan
+      ctx.closePath();
 
-        if (i === 0) {
-          ctx.moveTo(x, y);
-        } else {
-          ctx.lineTo(x, y);
-        }
-      });
+      // Gradient: lebih terang di puncak, makin transparan ke dasar
+      const gradient = ctx.createLinearGradient(0, 0, 0, height);
+      gradient.addColorStop(0, "rgba(255, 177, 92, 0.85)");
+      gradient.addColorStop(1, "rgba(255, 177, 92, 0.05)");
 
-      ctx.strokeStyle = "#ffb15c"; // warna ember, sesuai tema
-      ctx.lineWidth = 2;
-      ctx.stroke();
+      ctx.fillStyle = gradient;
+      ctx.fill();
 
       animationId = requestAnimationFrame(draw);
     };
